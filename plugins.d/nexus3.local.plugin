@@ -1,0 +1,31 @@
+#!/bin/bash
+
+function nexus3.describe {
+  echo "Installs a Nexus 3 repository manager in a nexus project."
+}
+
+function nexus3.help {
+  :
+}
+
+function nexus3.install {
+  status &> /dev/null  || error_exit "There's no cluster running"
+  ${OC_BINARY} adm new-project nexus --as=system:admin
+  create-shared-volume 'nexus/nexus-pv'
+  ${OC_BINARY} create -f https://raw.githubusercontent.com/OpenShiftDemos/nexus/master/nexus3-persistent-template.yaml -n nexus --as=system:admin
+  ${OC_BINARY} new-app nexus3-persistent -p VOLUME_CAPACITY=10Gi -n nexus --as=system:admin
+  ${OC_BINARY} adm policy add-role-to-user admin $(${OC_BINARY} whoami) --as=system:admin -n nexus
+  echo "Project 'nexus' has been created and shared with you. It has a Nexus instance that has shared storage with other clusters."
+}
+
+function nexus3.uninstall {
+  for resource in is/nexus dc/nexus \
+    svc/nexus route/nexus \
+    pvc/nexus-pv \
+    template/nexus3-persistent;
+  do
+    ${OC_BINARY} delete $resource --as=system:admin -n nexus
+  done
+}
+
+nexus3.describe

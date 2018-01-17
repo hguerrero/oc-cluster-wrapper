@@ -1,24 +1,21 @@
 #!/bin/bash
 
-function roadshow-test.describe {
+function roadshow.describe {
   echo "Installs the RoadShow environment in a roadshow project"
 }
 
-function roadshow-test.help {
+function roadshow.help {
    echo ""
 }
 
-function roadshow-test.install {
+function roadshow.install {
   status &> /dev/null  || error_exit "There's no cluster running"
 
+  # Install gitlab using the gitlab plugin
+  gitlab.install
 
-  # Prepull the images
-  docker pull centos/ruby-23-centos7:latest
-  docker pull centos/mongodb-32-centos7:latest
-  docker pull docker.io/openshiftroadshow/parksmap:1.0.0
-  docker pull jorgemoralespou/s2i-java:latest
-  docker pull registry.access.redhat.com/jboss-eap-7/eap70-openshift:latest
-
+  exit 1
+  
   ${OC_BINARY} project roadshow > /dev/null 2>&1
   if [[ $? == 1 ]]; then
     echo "[INFO] Creating roadshow project"
@@ -49,8 +46,8 @@ function roadshow-test.install {
   echo "[INFO] Project roadshow has been created and shared with you. It has all the roadshow apps deployed for testing purposes."
 }
 
-function roadshow-test.uninstall {
+function roadshow.uninstall {
       ${OC_BINARY} delete project/roadshow --as=system:admin
 }
 
-roadshow-test.describe
+roadshow.describe
